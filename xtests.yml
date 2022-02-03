@@ -1,0 +1,40 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+    name: integration-onap-core
+    namespace: onap
+spec:
+    template:
+        spec:
+            containers:
+            -   env:
+                -   name: NODE_NAME
+                    value: master
+                -   name: TAG
+                  #value: healthdist
+                    value: core
+                -   name: onap_namespace
+                    value: onap
+                image: nexus3.onap.org:10003/onap/xtesting-healthcheck:master
+                imagePullPolicy: Always
+                name: functest-onap
+                volumeMounts:
+                -   mountPath: /etc/localtime
+                    name: localtime
+                    readOnly: true
+                -   mountPath: /share/config
+                    name: robot-eteshare
+                -   mountPath: /var/lib/xtesting/results/
+                    name: robot-save-results
+            restartPolicy: Never
+            volumes:
+            -   hostPath:
+                    path: /etc/localtime
+                name: localtime
+            -   configMap:
+                    defaultMode: 493
+                    name: onap-robot-eteshare-configmap
+                name: robot-eteshare
+            -   hostPath:
+                    path: /dockerdata-nfs/onap/integration/xtesting-healthcheck/core
+                name: robot-save-results
